@@ -42,6 +42,11 @@ const startServer = (app) => {
 
 const handleSwitchDnsRequest = async (req, res) => {
   const lineChoice = req.body.line_choice;
+  const password = req.body.password;
+
+  if (password !== process.env.PASSWORD) {
+    return res.status(401).json({ success: false, message: '密碼錯誤。' });
+  }
 
   let targetIp;
   if (lineChoice === 'main') {

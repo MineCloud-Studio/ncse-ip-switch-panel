@@ -43,6 +43,8 @@
     <label for="main">主線路</label><br>
     <input type="radio" id="backup" name="line_choice" value="backup">
     <label for="backup">備援線路</label><br>
+    <label for="password">密碼:</label>
+    <input type="password" id="password" name="password"><br>
     <button type="submit">提交</button>
   </form>
   <div id="result"></div>
@@ -56,6 +58,7 @@
 
       const formData = new FormData(form);
       const lineChoice = formData.get('line_choice');
+      const password = formData.get('password');
 
       try {
         const response = await fetch('/api/switch-dns', {
@@ -63,7 +66,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ line_choice: lineChoice })
+          body: JSON.stringify({ line_choice: lineChoice, password: password })
         });
 
         const data = await response.json();
