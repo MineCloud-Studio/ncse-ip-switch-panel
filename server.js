@@ -74,9 +74,15 @@ const handleSwitchDnsRequest = async (req, res) => {
 const handleGetCurrentDnsRecordIp = async (req, res) => {
   try {
     const currentIp = await cloudflareService.getCurrentDnsRecordIp(process.env.DNS_RECORD_NAME);
-    const mainLineIp = process.env.MAIN_LINE_IP;
-    const backupLineIp = process.env.BACKUP_LINE_IP;
-    res.json({ success: true, currentIp, mainLineIp, backupLineIp });
+    let lineChoice;
+    if (currentIp === process.env.MAIN_LINE_IP) {
+      lineChoice = 'main';
+    } else if (currentIp === process.env.BACKUP_LINE_IP) {
+      lineChoice = 'backup';
+    } else {
+      lineChoice = 'unknown';
+    }
+    res.json({ success: true, lineChoice });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Failed to get current DNS record IP.' });

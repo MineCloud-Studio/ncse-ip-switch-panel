@@ -90,14 +90,12 @@
         const data = await response.json();
 
         if (data.success) {
-          const currentIp = data.currentIp;
-          const mainLineIp = data.mainLineIp;
-          const backupLineIp = data.backupLineIp;
-
-          if (currentIp === mainLineIp) {
+          if (data.lineChoice === 'main') {
             document.getElementById('main').checked = true;
-          } else if (currentIp === backupLineIp) {
+          } else if (data.lineChoice === 'backup') {
             document.getElementById('backup').checked = true;
+          } else {
+            console.error('Unknown line choice.');
           }
           form.disabled = false;
         } else {
