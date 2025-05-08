@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cloudflare DNS 線路切換器</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    form {
+      display: flow;
+      /* flex-direction: column; */
+      /* align-items: flex-start; */
+    }
+    label {
+      margin-bottom: 5px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>選擇線路</h1>
+  <form id="dnsForm" action="/api/switch-dns" method="POST">
+    <input type="radio" id="main" name="line_choice" value="main">
+    <label for="main">主線路</label><br>
+    <input type="radio" id="backup" name="line_choice" value="backup">
+    <label for="backup">備援線路</label><br>
+    <button type="submit">提交</button>
+  </form>
+  <div id="result"></div>
+
+  <script>
+    const form = document.querySelector('#dnsForm');
+    const resultDiv = document.querySelector('#result');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const lineChoice = formData.get('line_choice');
+
+      try {
+        const response = await fetch('/api/switch-dns', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ line_choice: lineChoice })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          resultDiv.textContent = data.message;
+        } else {
+          resultDiv.textContent = `錯誤: ${data.message}`;
+        }
+      } catch (error) {
+        console.error(error);
+        resultDiv.textContent = '提交更改時發生錯誤，請聯繫我們。';
+      }
+    });
+
+    const getCurrentIp = async () => {
+      try {
+        form.disabled = true;
+        const response = await fetch('/api/current-ip');
+        const data = await response.json();
+
+        if (data.success) {
+          const currentIp = data.currentIp;
+          const mainLineIp = data.mainLineIp;
+          const backupLineIp = data.backupLineIp;
+
+          if (currentIp === mainLineIp) {
+            document.getElementById('main').checked = true;
+          } else if (currentIp === backupLineIp) {
+            document.getElementById('backup').checked = true;
+          }
+          form.disabled = false;
+        } else {
+          console.error(data.message);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    getCurrentIp();
+  </script>
+</body>
+</html>
